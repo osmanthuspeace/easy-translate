@@ -51,6 +51,7 @@ function activate(context) {
 
   context.subscriptions.push(disposable);
 }
+
 // 读取配置文件中的密钥
 function loadConfig() {
   const configPath = path.join(__dirname, "config.json");

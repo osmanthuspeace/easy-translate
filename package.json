@@ -1,16 +1,24 @@
 {
   "name": "easy-translate",
   "displayName": "easy-translate",
-  "description": "",
-  "version": "0.0.1",
+  "description": "A VSCode extension to translate text",
+  "version": "0.0.3",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/osmanthuspeace/easy-translate"
+  },
   "engines": {
     "vscode": "^1.95.0"
   },
   "categories": [
     "Other"
   ],
+  "publisher": "osmanthuspeace",
+  "license": "MIT",
+  "author": "osmanthuspeace",
   "activationEvents": [],
   "main": "./extension.js",
+  "icon": "translate_icon.png",
   "contributes": {
     "commands": [
       {
@@ -21,13 +29,8 @@
     "keybindings": [
       {
         "command": "easy-translate.translateSelectedText",
-        "key": "ctrl+shift+t",
-        "when": "editorTextFocus && editorHasSelection && !mac"
-      },
-      {
-        "command": "easy-translate.translateSelectedText",
         "key": "cmd+shift+t",
-        "when": "editorTextFocus && editorHasSelection && mac"
+        "when": "editorTextFocus && editorHasSelection"
       }
     ],
     "configuration": {
