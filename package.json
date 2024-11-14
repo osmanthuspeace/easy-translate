@@ -2,7 +2,7 @@
   "name": "easy-translate",
   "displayName": "easy-translate",
   "description": "A VSCode extension to translate text",
-  "version": "0.0.3",
+  "version": "0.1.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/osmanthuspeace/easy-translate"
