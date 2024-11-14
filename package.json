@@ -1,0 +1,66 @@
+{
+  "name": "easy-translate",
+  "displayName": "easy-translate",
+  "description": "",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.95.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [],
+  "main": "./extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "easy-translate.translateSelectedText",
+        "title": "Translate"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "easy-translate.translateSelectedText",
+        "key": "ctrl+shift+t",
+        "when": "editorTextFocus && editorHasSelection && !mac"
+      },
+      {
+        "command": "easy-translate.translateSelectedText",
+        "key": "cmd+shift+t",
+        "when": "editorTextFocus && editorHasSelection && mac"
+      }
+    ],
+    "configuration": {
+      "type": "object",
+      "properties": {
+        "easy-translate.appId": {
+          "type": "string",
+          "default": "",
+          "description": "百度翻译 API 的 APP_ID"
+        },
+        "easy-translate.secretKey": {
+          "type": "string",
+          "default": "",
+          "description": "百度翻译 API 的 SECRET_KEY"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "pretest": "npm run lint",
+    "test": "vscode-test"
+  },
+  "devDependencies": {
+    "@types/mocha": "^10.0.9",
+    "@types/node": "20.x",
+    "@types/vscode": "^1.95.0",
+    "@vscode/test-cli": "^0.0.10",
+    "@vscode/test-electron": "^2.4.1",
+    "eslint": "^9.13.0"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "node-fetch": "^2.7.0"
+  }
+}
