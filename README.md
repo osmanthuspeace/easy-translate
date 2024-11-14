@@ -27,8 +27,7 @@
 在 VSCode 的 `settings.json` 文件中，配置你的百度翻译 API 密钥：
 
 ```json
-json
-Copy code
+
 "easy-translate.appId": "your-app-id",
 "easy-translate.secretKey": "your-secret-key"
 
@@ -69,8 +68,7 @@ Copy code
 To configure your Baidu Translate API keys in the `settings.json` file:
 
 ```json
-json
-Copy code
+
 "easy-translate.appId": "your-app-id",
 "easy-translate.secretKey": "your-secret-key"
 
