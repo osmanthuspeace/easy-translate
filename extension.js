@@ -14,6 +14,32 @@ function activate(context) {
   console.log(
     'Congratulations, your extension "easy-translate" is now active!'
   );
+
+  // 监听换行并处理注释
+  vscode.workspace.onDidChangeTextDocument((event) => {
+    //获取当前活动的编辑器实例
+    const editor = vscode.window.activeTextEditor;
+    if (!editor || event.document !== editor.document) return;
+
+    if (event.contentChanges.length !== 1) return; // 跳过非单一变更的操作（如粘贴代码等）
+
+    //获取内容变化数组的第一个变更记录 change
+    const change = event.contentChanges[0];
+    if (!change || !change.text.includes("\n")) return; // 仅处理换行符
+
+    //获取变更开始的位置（光标的位置）
+    const position = change.range.start;
+    const line = editor.document.lineAt(position.line).text;
+    // console.log("line", line);
+    // 判断是否是注释行
+    if (line.trimStart().startsWith("//")) {
+      vscode.window.showInformationMessage("这是单行注释");
+      insertCommentPrefix(editor, position, "// ");
+    } else if (line.trimStart().startsWith("/*")) {
+      insertCommentPrefix(editor, position, " * ");
+    }
+  });
+
   let disposable = vscode.commands.registerCommand(
     "easy-translate.translateSelectedText",
     async () => {
@@ -26,12 +52,13 @@ function activate(context) {
 
       const selection = editor.selection;
       const selectedText = editor.document.getText(selection);
-      vscode.window.showInformationMessage("选择的文本：", selectedText);
+      // vscode.window.showInformationMessage("选择的文本：", selectedText);
 
       // 去除注释标记
       const cleanedText = selectedText
         .replace(/\/\/\s*/g, "") // 删除单行注释的标记 //，保留内容
         .replace(/\/\*|\*\//g, "") // 删除多行注释的标记 /* 和 */
+        .replace(/^\s*\*\s?/gm, "") // 删除多行注释中每一行开头的 * 号
         .replace(/\n/g, " ") // 将换行符替换为空格
         .trim();
       if (cleanedText.length > 0) {
@@ -51,7 +78,26 @@ function activate(context) {
 
   context.subscriptions.push(disposable);
 }
+//TODO: 获取当前文件的后缀名，处理不同语言的注释
+function getFileExtension() {
+  const editor = vscode.window.activeTextEditor;
+  if (!editor) return null; 
 
+  const fileName = editor.document.fileName; // 获取当前文件名
+  return path.extname(fileName).slice(1); // 提取后缀名，去掉 "."
+}
+
+/**
+ * 插入注释前缀
+ * @param {vscode.TextEditor} editor 当前编辑器
+ * @param {vscode.Position} position 光标位置
+ * @param {string} prefix 注释前缀
+ */
+function insertCommentPrefix(editor, position, prefix) {
+  editor.edit((editBuilder) => {
+    editBuilder.insert(new vscode.Position(position.line + 1, 0), prefix);
+  });
+}
 // 读取配置文件中的密钥
 function loadConfig() {
   const configPath = path.join(__dirname, "config.json");
