@@ -33,7 +33,6 @@ function activate(context) {
     // console.log("line", line);
     // 判断是否是注释行
     if (line.trimStart().startsWith("//")) {
-      vscode.window.showInformationMessage("这是单行注释");
       insertCommentPrefix(editor, position, "// ");
     } else if (line.trimStart().startsWith("/*")) {
       insertCommentPrefix(editor, position, " * ");
@@ -59,13 +58,18 @@ function activate(context) {
         .replace(/\/\/\s*/g, "") // 删除单行注释的标记 //，保留内容
         .replace(/\/\*|\*\//g, "") // 删除多行注释的标记 /* 和 */
         .replace(/^\s*\*\s?/gm, "") // 删除多行注释中每一行开头的 * 号
+        .replace(/^\s+/gm, "") // 删除每行开头的空白字符（缩进）
         .replace(/\n/g, " ") // 将换行符替换为空格
         .trim();
       if (cleanedText.length > 0) {
         try {
+          //将文本放到同一行
+          await editor.edit((editBuilder) => {
+            editBuilder.replace(selection, "// " + cleanedText);
+          });
           const translatedText = await translateText(cleanedText);
           // 复制翻译结果到剪切板
-          vscode.env.clipboard.writeText("// " + translatedText);
+          vscode.env.clipboard.writeText(translatedText);
           vscode.window.showInformationMessage("翻译成功，结果已复制到剪切板");
         } catch (error) {
           vscode.window.showErrorMessage("翻译失败: " + error.message);
@@ -81,7 +85,7 @@ function activate(context) {
 //TODO: 获取当前文件的后缀名，处理不同语言的注释
 function getFileExtension() {
   const editor = vscode.window.activeTextEditor;
-  if (!editor) return null; 
+  if (!editor) return null;
 
   const fileName = editor.document.fileName; // 获取当前文件名
   return path.extname(fileName).slice(1); // 提取后缀名，去掉 "."
@@ -93,10 +97,24 @@ function getFileExtension() {
  * @param {vscode.Position} position 光标位置
  * @param {string} prefix 注释前缀
  */
-function insertCommentPrefix(editor, position, prefix) {
-  editor.edit((editBuilder) => {
-    editBuilder.insert(new vscode.Position(position.line + 1, 0), prefix);
+async function insertCommentPrefix(editor, position, prefix) {
+  const currentLine = editor.document.lineAt(position.line).text;
+
+  // 获取当前行的缩进
+  const indent = currentLine.match(/^\s*/)[0] ?? "";
+  const retract = indent + prefix;
+
+  const editSuccess = await editor.edit((editBuilder) => {
+    // 插入注释前缀时，应用当前行的缩进
+    editBuilder.insert(new vscode.Position(position.line + 1, 0), retract);
   });
+  if (editSuccess) {
+    // 设置光标位置到新插入的前缀之后
+    const newPosition = new vscode.Position(position.line + 1, retract.length);
+    editor.selection = new vscode.Selection(newPosition, newPosition);
+  } else {
+    vscode.window.showErrorMessage("插入注释前缀失败");
+  }
 }
 // 读取配置文件中的密钥
 function loadConfig() {
